@@ -41,9 +41,9 @@ export default class Grid {
   getActions(x: number, y: number): GridAction[] {
     return [
       [this.getNode(x - 1, y), "Left"],
-      [this.getNode(x, y - 1), "Down"],
+      [this.getNode(x, y - 1), "Up"],
       [this.getNode(x + 1, y), "Right"],
-      [this.getNode(x, y + 1), "Up"]
+      [this.getNode(x, y + 1), "Down"]
     ]
       .filter(([node, action]: [GridNode | null, string]) => node !== null && node.wall === false)
       .map(([node, action]: [GridNode, string]) => ({ node, action }));

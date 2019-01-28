@@ -5,7 +5,9 @@ import Policy from "./Policy";
 
 let grid: Grid, ctx: CanvasRenderingContext2D, agent: Actor, policy: Policy;
 
-const generationP = document.querySelector("#generation") as HTMLParagraphElement;
+const generationP = document.querySelector(
+  "#generation"
+) as HTMLParagraphElement;
 
 let cumulativeReward = 0,
   generation = 0;
@@ -46,24 +48,26 @@ function bootstrap() {
     policy = Policy.fromSeed(() => 0.5, grid.lengthOfSides);
   }
 
-  document
-    .querySelector("#reset-policy")
-    .addEventListener("click", () => (policy = Policy.fromSeed(() => 0.5, grid.lengthOfSides)));
+  document.querySelector("#reset-policy").addEventListener("click", () => {
+    policy = Policy.fromSeed(() => 0.5, grid.lengthOfSides);
+    reset();
+  });
 
   canvas.addEventListener("click", e => {
     const node = grid.getNodeAtPixel(e.offsetX, e.offsetY, ctx);
 
     if (node != null) {
       node.wall = !node.wall;
-      generation = 0;
     }
+
+    reset();
   });
 
   addListener("#learning-rate", val => (policy.learningRate = val));
   addListener("#exploration-factor", val => (policy.explorationFactor = val));
   addListener("#discount", val => (policy.discount = val));
 
-  requestAnimationFrame(update);
+  requestAnimationFrame(loop);
 }
 
 function reward(state: ActorState, action: GridAction): number {
@@ -75,10 +79,24 @@ function reward(state: ActorState, action: GridAction): number {
   return -1.0;
 }
 
-function update() {
+function reset() {
+  generation = 0;
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
+function loop() {
+  update();
+  render();
+  requestAnimationFrame(loop);
+}
+
+function render() {
+ // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   grid.render(ctx);
   agent.render(ctx);
+}
+
+function update() {
   const actions = agent.actions();
 
   const prevState = agent.state;
@@ -104,8 +122,6 @@ function update() {
     generationP.innerText = `Generation: ${generation++}`;
     localStorage.setItem("policy", policy.serialize());
   }
-
-  requestAnimationFrame(update);
 }
 
 document.addEventListener("DOMContentLoaded", bootstrap);

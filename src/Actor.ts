@@ -1,9 +1,21 @@
 import Grid, { GridNode, GridAction } from "./Grid";
 import ActorState from "./ActorState";
 
+const actionsToRadians: { [key: string]: number } = {
+  Up: -Math.PI / 2,
+  Down: Math.PI / 2,
+  Left: Math.PI,
+  Right: 0.0
+};
+
 export default class Actor {
   private _state: ActorState;
-  
+
+  private _lastActionWithState: {
+    last: ActorState;
+    action: GridAction;
+  };
+
   constructor(private _grid: Grid) {
     this._state = _grid.startNode;
   }
@@ -17,6 +29,10 @@ export default class Actor {
   }
 
   takeAction(action: GridAction) {
+    this._lastActionWithState = {
+      last: this._state,
+      action
+    };
     this._state = action.node;
   }
 
@@ -25,10 +41,40 @@ export default class Actor {
     const cellWidth = width / this._grid.lengthOfSides;
     const cellHeight = height / this._grid.lengthOfSides;
 
-    context.fillStyle = "#000";
-    context.beginPath();
-    context.arc(cellWidth * this._state.x + cellWidth / 2, cellHeight * this._state.y + cellHeight / 2, 10, 0, 360);
-    context.fill();
-  }
+    const centerX = cellWidth * this._state.x + cellWidth / 2;
+    const centerY = cellHeight * this._state.y + cellHeight / 2;
 
+    context.fillStyle = "rgba(0,0,0,0.02)";
+    context.beginPath();
+    context.arc(centerX, centerY, 6.25, 0, 360);
+
+    context.fill();
+
+    if (this._lastActionWithState !== null) {
+      const {
+        last: { x: lastX, y: lastY },
+        action: { action: actionName }
+      } = this._lastActionWithState;
+
+      const lastCenterX = cellWidth * lastX + cellWidth / 2;
+      const lastCenterY = cellHeight * lastY + cellHeight / 2;
+      context.save();
+
+      context.translate(lastCenterX, lastCenterY);
+      context.rotate(actionsToRadians[actionName]);
+      context.beginPath();
+
+      context.moveTo(5, -1);
+      context.lineTo(12.5, -1);
+      context.lineTo(12.5, -5);
+      context.lineTo(20, 0);
+      context.lineTo(12.5, 5);
+      context.lineTo(12.5, 1);
+      context.lineTo(5, 1);
+      context.lineTo(5, -1);
+
+      context.fill();
+      context.restore();
+    }
+  }
 }
