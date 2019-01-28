@@ -1,34 +1,14 @@
-import Grid, { GridAction } from "./models/Grid";
-import Actor from "./models/Actor";
-import ActorState from "./models/ActorState";
+import Grid, { GridAction } from "./Grid";
+import Actor from "./Actor";
+import ActorState from "./ActorState";
+import Policy from "./Policy";
 
-let grid: Grid, ctx: CanvasRenderingContext2D, agent: Actor;
+let grid: Grid, ctx: CanvasRenderingContext2D, agent: Actor, policy: Policy;
 
-let stateValues: number[][] = [];
+const generationP = document.querySelector("#generation") as HTMLParagraphElement;
 
-const generationP = document.querySelector(
-  "#generation"
-) as HTMLParagraphElement;
-
-let learningRate = 0.2,
-  discount = 0.8,
-  cumulativeReward = 0,
-  explorationFactor = 0.9,
+let cumulativeReward = 0,
   generation = 0;
-
-function setPolicy(readFromJson: boolean) {
-  try {
-    if (!readFromJson) throw "booo"; // haxihax
-    stateValues = JSON.parse(localStorage.getItem("policy")) as number[][];
-  } catch (e) {
-    for (let i = 0; i < grid.lengthOfSides; ++i) {
-      stateValues[i] = [];
-      for (let j = 0; j < grid.lengthOfSides; ++j) {
-        stateValues[i][j] = 0;
-      }
-    }
-  }
-}
 
 function addListener(id: string, onChange: ((value: number) => void)) {
   document
@@ -58,11 +38,17 @@ function bootstrap() {
   grid = new Grid(template.replace(/\s+/gim, ""));
   agent = new Actor(grid);
 
-  setPolicy(true);
+  const serializedPolicy = localStorage.getItem("policy");
+
+  if (serializedPolicy) {
+    policy = Policy.fromString(serializedPolicy, grid.lengthOfSides);
+  } else {
+    policy = Policy.fromSeed(() => 0.5, grid.lengthOfSides);
+  }
 
   document
     .querySelector("#reset-policy")
-    .addEventListener("click", () => setPolicy(false));
+    .addEventListener("click", () => (policy = Policy.fromSeed(() => 0.5, grid.lengthOfSides)));
 
   canvas.addEventListener("click", e => {
     const node = grid.getNodeAtPixel(e.offsetX, e.offsetY, ctx);
@@ -73,40 +59,11 @@ function bootstrap() {
     }
   });
 
-  addListener("#learning-rate", val => (learningRate = val));
-  addListener("#exploration-factor", val => (explorationFactor = val));
-  addListener("#discount", val => (discount = val));
+  addListener("#learning-rate", val => (policy.learningRate = val));
+  addListener("#exploration-factor", val => (policy.explorationFactor = val));
+  addListener("#discount", val => (policy.discount = val));
 
   requestAnimationFrame(update);
-}
-
-function stateValue(x: number, y: number): number {
-  return stateValues[x][y];
-}
-
-function setStateValue(x: number, y: number, val: number) {
-  stateValues[x][y] = val;
-}
-
-function policy(actions: GridAction[]): GridAction | null {
-  if (actions.length === 0) return null;
-
-  if (Math.random() > explorationFactor) {
-    console.log("exploring!");
-    return actions[Math.floor(Math.random() * actions.length)];
-  }
-
-  let maxAction = actions[0];
-
-  actions.forEach(a => {
-    const { x, y } = a.node;
-
-    if (stateValue(x, y) > stateValue(maxAction.node.x, maxAction.node.y)) {
-      maxAction = a;
-    }
-  });
-
-  return maxAction;
 }
 
 function reward(state: ActorState, action: GridAction): number {
@@ -123,33 +80,29 @@ function update() {
   grid.render(ctx);
   agent.render(ctx);
   const actions = agent.actions();
-  const { x: prevX, y: prevY } = agent.state;
 
-  const pickedAction = policy(actions);
+  const prevState = agent.state;
+
+  const pickedAction = policy.evaluate(actions);
 
   if (pickedAction != null) {
     agent.takeAction(pickedAction);
   }
 
-  const { x, y } = agent.state;
+  const nextState = agent.state;
 
   const stepReward = reward(agent.state, pickedAction);
+
   cumulativeReward += stepReward;
 
-  setStateValue(
-    prevX,
-    prevY,
-    stateValue(prevX, prevY) +
-      learningRate *
-        (stepReward + discount * stateValue(x, y) - stateValue(prevX, prevY))
-  );
+  policy.processStep(prevState, nextState, stepReward);
 
   if (agent.state === grid.destinationNode) {
     console.log("Found end, cumulative reward = " + cumulativeReward);
     agent.takeAction({ action: "", node: grid.startNode });
     cumulativeReward = 0;
     generationP.innerText = `Generation: ${generation++}`;
-    localStorage.setItem("policy", JSON.stringify(stateValues));
+    localStorage.setItem("policy", policy.serialize());
   }
 
   requestAnimationFrame(update);
