@@ -11,11 +11,7 @@ export interface GridAction {
   action: string;
 }
 
-function nodeFromTemplate(
-  template: string,
-  index: number,
-  lengthOfSides: number
-): GridNode {
+function nodeFromTemplate(template: string, index: number, lengthOfSides: number): GridNode {
   return {
     wall: template === "W",
     x: index % lengthOfSides,
@@ -31,12 +27,11 @@ export default class Grid {
   private _length: number = 0;
 
   constructor(template: string) {
+    template = template.replace(/\s+/gim, "");
+
     this._length = Math.floor(Math.sqrt(template.length));
 
-    this._grid = template
-      .replace(/\s+/gim, "")
-      .split("")
-      .map((t, i) => nodeFromTemplate(t, i, this._length));
+    this._grid = template.split("").map((t, i) => nodeFromTemplate(t, i, this._length));
   }
 
   getNode(x: number, y: number): GridNode | null {
@@ -50,10 +45,7 @@ export default class Grid {
       [this.getNode(x + 1, y), "Right"],
       [this.getNode(x, y + 1), "Up"]
     ]
-      .filter(
-        ([node, action]: [GridNode | null, string]) =>
-          node !== null && node.wall === false
-      )
+      .filter(([node, action]: [GridNode | null, string]) => node !== null && node.wall === false)
       .map(([node, action]: [GridNode, string]) => ({ node, action }));
   }
 
@@ -73,11 +65,7 @@ export default class Grid {
     return this._grid.filter(x => x.destination)[0];
   }
 
-  getNodeAtPixel(
-    x: number,
-    y: number,
-    context: CanvasRenderingContext2D
-  ): GridNode {
+  getNodeAtPixel(x: number, y: number, context: CanvasRenderingContext2D): GridNode {
     const { cellWidth, cellHeight } = this.getCellDimensions(context);
 
     const cellX = Math.floor(x / cellWidth),
@@ -96,19 +84,9 @@ export default class Grid {
         const node = this.getNode(x, y);
         if (node == null) continue;
 
-        context.strokeRect(
-          x * cellWidth,
-          y * cellHeight,
-          cellWidth,
-          cellHeight
-        );
+        context.strokeRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
         if (node.wall) {
-          context.fillRect(
-            x * cellWidth,
-            y * cellHeight,
-            cellWidth,
-            cellHeight
-          );
+          context.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
         }
 
         if (node.start) {

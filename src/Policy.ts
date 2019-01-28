@@ -2,8 +2,8 @@ import ActorState from "./ActorState";
 import { GridAction } from "./Grid";
 
 export default class Policy {
-  public explorationFactor = 0.2;
-  public discount = 0.9;
+  public explorationFactor = 0.01;
+  public discount = 0.95;
   public learningRate = 0.1;
 
   private constructor(private _values: number[][]) {}

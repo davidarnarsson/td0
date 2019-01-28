@@ -54,11 +54,12 @@
       <div class="controls">
         <button id="reset-policy">Reset policy</button>
         <label for="learning-rate">Learning rate</label>
-        <input type="range" min="0" max="100" step="1" id="learning-rate" />
+        <input value="10" type="range" min="0" max="100" step="1" id="learning-rate" />
         <label for="discount">Discount</label>
-        <input type="range" min="0" max="100" step="1" id="discount" />
+        <input value="95" type="range" min="0" max="100" step="1" id="discount" />
         <label for="exploration-factor">(inverted) Exploration factor</label>
         <input
+          value="1"
           type="range"
           min="0"
           max="100"

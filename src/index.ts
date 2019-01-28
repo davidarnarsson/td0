@@ -69,7 +69,7 @@ function bootstrap() {
 function reward(state: ActorState, action: GridAction): number {
   if (action == null) return -2.0;
   if (action.node === grid.destinationNode) {
-    return 2.0;
+    return 1.0;
   }
 
   return -1.0;
