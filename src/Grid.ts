@@ -79,27 +79,23 @@ export default class Grid {
 
     for (let y = 0; y < this.lengthOfSides; ++y)
       for (let x = 0; x < this.lengthOfSides; ++x) {
+        context.save();
+        context.translate(x * cellWidth, y * cellHeight);
         context.strokeStyle = context.fillStyle = "#555";
         context.lineWidth = 2;
         const node = this.getNode(x, y);
         if (node == null) continue;
 
-        context.strokeRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+        context.strokeRect(0, 0, cellWidth, cellHeight);
         if (node.wall) {
-          context.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+          context.fillRect(0, 0, cellWidth, cellHeight);
         }
 
         if (node.start) {
           context.strokeStyle = "green";
           context.lineWidth = 4;
           context.beginPath();
-          context.arc(
-            x * cellWidth + cellWidth / 2,
-            y * cellHeight + cellHeight / 2,
-            cellWidth / 4,
-            0,
-            360
-          );
+          context.arc(cellWidth / 2, cellHeight / 2, cellWidth / 4, 0, 360);
           context.stroke();
         }
         if (node.destination) {
@@ -108,15 +104,10 @@ export default class Grid {
 
           context.beginPath();
 
-          context.arc(
-            x * cellWidth + cellWidth / 2,
-            y * cellHeight + cellHeight / 2,
-            cellWidth / 4,
-            0,
-            360
-          );
+          context.arc(cellWidth / 2, cellHeight / 2, cellWidth / 4, 0, 360);
           context.stroke();
         }
+        context.restore();
       }
   }
 

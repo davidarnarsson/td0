@@ -41,26 +41,26 @@ export default class Actor {
     const cellWidth = width / this._grid.lengthOfSides;
     const cellHeight = height / this._grid.lengthOfSides;
 
-    const centerX = cellWidth * this._state.x + cellWidth / 2;
-    const centerY = cellHeight * this._state.y + cellHeight / 2;
-
+    context.save();
+    context.translate(
+      cellWidth * this._state.x + cellWidth / 2,
+      cellHeight * this._state.y + cellHeight / 2
+    );
     context.fillStyle = "rgba(0,0,0,0.02)";
     context.beginPath();
-    context.arc(centerX, centerY, 6.25, 0, 360);
+    context.arc(0, 0, 6.25, 0, 360);
 
     context.fill();
-
+    context.restore();
     if (this._lastActionWithState !== null) {
       const {
         last: { x: lastX, y: lastY },
         action: { action: actionName }
       } = this._lastActionWithState;
 
-      const lastCenterX = cellWidth * lastX + cellWidth / 2;
-      const lastCenterY = cellHeight * lastY + cellHeight / 2;
       context.save();
-
-      context.translate(lastCenterX, lastCenterY);
+      context.fillStyle = "rgba(0,0,0,0.02)";
+      context.translate(cellWidth * lastX + cellWidth / 2, cellHeight * lastY + cellHeight / 2);
       context.rotate(actionsToRadians[actionName]);
       context.beginPath();
 

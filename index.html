@@ -53,19 +53,12 @@
       <div class="info"><p id="generation"></p></div>
       <div class="controls">
         <button id="reset-policy">Reset policy</button>
-        <label for="learning-rate">Learning rate</label>
+        <label for="learning-rate">Learning rate: <span class="value">10%</span></label>
         <input value="10" type="range" min="0" max="100" step="1" id="learning-rate" />
-        <label for="discount">Discount</label>
+        <label for="discount">Discount <span class="value">95%</span></label>
         <input value="95" type="range" min="0" max="100" step="1" id="discount" />
-        <label for="exploration-factor">(inverted) Exploration factor</label>
-        <input
-          value="1"
-          type="range"
-          min="0"
-          max="100"
-          step="1"
-          id="exploration-factor"
-        />
+        <label for="exploration-factor">Exploration factor: <span class="value">1%</span></label>
+        <input value="1" type="range" min="0" max="100" step="1" id="exploration-factor" />
       </div>
     </div>
   </body>

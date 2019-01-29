@@ -5,19 +5,21 @@ import Policy from "./Policy";
 
 let grid: Grid, ctx: CanvasRenderingContext2D, agent: Actor, policy: Policy;
 
-const generationP = document.querySelector(
-  "#generation"
-) as HTMLParagraphElement;
+const generationP = document.querySelector("#generation") as HTMLParagraphElement;
 
 let cumulativeReward = 0,
   generation = 0;
 
 function addListener(id: string, onChange: ((value: number) => void)) {
-  document
-    .querySelector(id)
-    .addEventListener("change", e =>
-      onChange(parseInt((e.target as HTMLInputElement).value, 10) / 100.0)
-    );
+  const valueSpan = document.querySelector(
+    `label[for = "${id.slice(1)}"] > .value`
+  ) as HTMLSpanElement;
+  document.querySelector(id).addEventListener("change", e => {
+    const element = e.target as HTMLInputElement;
+    const value = parseInt(element.value, 10) / 100.0;
+    valueSpan.innerText = `${element.value}%`;
+    onChange(value);
+  });
 }
 
 function bootstrap() {
@@ -91,12 +93,21 @@ function loop() {
 }
 
 function render() {
- // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   grid.render(ctx);
   agent.render(ctx);
 }
 
 function update() {
+  if (agent.state === grid.destinationNode) {
+    console.log("Found end, cumulative reward = " + cumulativeReward);
+    agent.takeAction({ action: "", node: grid.startNode });
+    cumulativeReward = 0;
+    generationP.innerText = `Generation: ${generation++}`;
+    localStorage.setItem("policy", policy.serialize());
+    return;
+  }
+
   const actions = agent.actions();
 
   const prevState = agent.state;
@@ -114,14 +125,6 @@ function update() {
   cumulativeReward += stepReward;
 
   policy.processStep(prevState, nextState, stepReward);
-
-  if (agent.state === grid.destinationNode) {
-    console.log("Found end, cumulative reward = " + cumulativeReward);
-    agent.takeAction({ action: "", node: grid.startNode });
-    cumulativeReward = 0;
-    generationP.innerText = `Generation: ${generation++}`;
-    localStorage.setItem("policy", policy.serialize());
-  }
 }
 
 document.addEventListener("DOMContentLoaded", bootstrap);
