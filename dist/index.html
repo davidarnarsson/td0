@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      body {
+        font-size: 16px;
+        font-family: sans-serif;
+        line-height: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 720px;
+        margin: auto;
+      }
+
+      button {
+        background: white;
+        border: 1px solid #555;
+        padding: 1rem;
+        align-self: flex-end;
+      }
+
+      #canvas {
+        border: 1px solid #555;
+        margin-bottom: 1rem;
+      }
+
+      .panel {
+        flex-flow: row nowrap;
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+      }
+      .panel > div {
+        flex: 1 0 50%;
+      }
+
+      .controls {
+        display: flex;
+        flex-flow: column;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="canvas" width="720" height="720"> </canvas>
+    <div class="panel">
+      <div class="info"><p id="generation"></p></div>
+      <div class="controls">
+        <button id="reset-policy">Reset policy</button>
+        <label for="learning-rate">Learning rate: <span class="value">10%</span></label>
+        <input value="10" type="range" min="0" max="100" step="1" id="learning-rate" />
+        <label for="discount">Discount <span class="value">95%</span></label>
+        <input value="95" type="range" min="0" max="100" step="1" id="discount" />
+        <label for="exploration-factor">Exploration factor: <span class="value">1%</span></label>
+        <input value="1" type="range" min="0" max="100" step="1" id="exploration-factor" />
+      </div>
+    </div>
+  <script type="text/javascript" src="bundle.js"></script></body>
+</html>
