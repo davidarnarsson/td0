@@ -46,7 +46,7 @@ export default class Actor {
       cellWidth * this._state.x + cellWidth / 2,
       cellHeight * this._state.y + cellHeight / 2
     );
-    context.fillStyle = "rgba(0,0,0,0.02)";
+    context.fillStyle = "rgba(0,0,0,0.5)";
     context.beginPath();
     context.arc(0, 0, 6.25, 0, 360);
 
@@ -59,7 +59,7 @@ export default class Actor {
       } = this._lastActionWithState;
 
       context.save();
-      context.fillStyle = "rgba(0,0,0,0.02)";
+      context.fillStyle = "rgba(0,0,0,0.5)";
       context.translate(cellWidth * lastX + cellWidth / 2, cellHeight * lastY + cellHeight / 2);
       context.rotate(actionsToRadians[actionName]);
       context.beginPath();

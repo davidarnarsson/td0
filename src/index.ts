@@ -1,20 +1,22 @@
-import Grid, { GridAction } from "./Grid";
-import Actor from "./Actor";
-import ActorState from "./ActorState";
-import Policy from "./Policy";
+import Grid, { GridAction } from './Grid';
+import Actor from './Actor';
+import ActorState from './ActorState';
+import Policy from './Policy';
 
 let grid: Grid, ctx: CanvasRenderingContext2D, agent: Actor, policy: Policy;
 
-const generationP = document.querySelector("#generation") as HTMLParagraphElement;
+const generationP = document.querySelector(
+  '#generation',
+) as HTMLParagraphElement;
 
 let cumulativeReward = 0,
   generation = 0;
 
-function addListener(id: string, onChange: ((value: number) => void)) {
+function addListener(id: string, onChange: (value: number) => void) {
   const valueSpan = document.querySelector(
-    `label[for = "${id.slice(1)}"] > .value`
+    `label[for = "${id.slice(1)}"] > .value`,
   ) as HTMLSpanElement;
-  document.querySelector(id).addEventListener("change", e => {
+  document.querySelector(id).addEventListener('change', (e) => {
     const element = e.target as HTMLInputElement;
     const value = parseInt(element.value, 10) / 100.0;
     valueSpan.innerText = `${element.value}%`;
@@ -23,9 +25,9 @@ function addListener(id: string, onChange: ((value: number) => void)) {
 }
 
 function bootstrap() {
-  const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
+  const canvas = document.querySelector('#canvas') as HTMLCanvasElement;
 
-  ctx = canvas.getContext("2d");
+  ctx = canvas.getContext('2d');
 
   const template = `
    WWWWWWWWWW
@@ -39,10 +41,10 @@ function bootstrap() {
    W.......DW
    WWWWWWWWWW`;
 
-  grid = new Grid(template.replace(/\s+/gim, ""));
+  grid = new Grid(template.replace(/\s+/gim, ''));
   agent = new Actor(grid);
 
-  const serializedPolicy = localStorage.getItem("policy");
+  const serializedPolicy = localStorage.getItem('policy');
 
   if (serializedPolicy) {
     policy = Policy.fromString(serializedPolicy, grid.lengthOfSides);
@@ -50,12 +52,12 @@ function bootstrap() {
     policy = Policy.fromSeed(() => 0.5, grid.lengthOfSides);
   }
 
-  document.querySelector("#reset-policy").addEventListener("click", () => {
+  document.querySelector('#reset-policy').addEventListener('click', () => {
     policy = Policy.fromSeed(() => 0.5, grid.lengthOfSides);
     reset();
   });
 
-  canvas.addEventListener("click", e => {
+  canvas.addEventListener('click', (e) => {
     const node = grid.getNodeAtPixel(e.offsetX, e.offsetY, ctx);
 
     if (node != null) {
@@ -65,9 +67,9 @@ function bootstrap() {
     reset();
   });
 
-  addListener("#learning-rate", val => (policy.learningRate = val));
-  addListener("#exploration-factor", val => (policy.explorationFactor = val));
-  addListener("#discount", val => (policy.discount = val));
+  addListener('#learning-rate', (val) => (policy.learningRate = val));
+  addListener('#exploration-factor', (val) => (policy.explorationFactor = val));
+  addListener('#discount', (val) => (policy.discount = val));
 
   requestAnimationFrame(loop);
 }
@@ -100,11 +102,12 @@ function render() {
 
 function update() {
   if (agent.state === grid.destinationNode) {
-    console.log("Found end, cumulative reward = " + cumulativeReward);
-    agent.takeAction({ action: "", node: grid.startNode });
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    console.log('Found end, cumulative reward = ' + cumulativeReward);
+    agent.takeAction({ action: '', node: grid.startNode });
     cumulativeReward = 0;
     generationP.innerText = `Generation: ${generation++}`;
-    localStorage.setItem("policy", policy.serialize());
+    localStorage.setItem('policy', policy.serialize());
     return;
   }
 
@@ -127,4 +130,4 @@ function update() {
   policy.processStep(prevState, nextState, stepReward);
 }
 
-document.addEventListener("DOMContentLoaded", bootstrap);
+document.addEventListener('DOMContentLoaded', bootstrap);
